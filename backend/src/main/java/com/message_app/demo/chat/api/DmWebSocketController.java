@@ -1,10 +1,9 @@
-package com.message_app.demo.rooms.service;
+package com.message_app.demo.chat.api;
 
-import com.message_app.demo.WebSocketEvents;
-import com.message_app.demo.rooms.domain.Conversation;
-import com.message_app.demo.rooms.domain.Message;
-import com.message_app.demo.rooms.repo.DmService;
-import com.message_app.demo.rooms.repo.MessageRepository;
+import com.message_app.demo.chat.domain.Conversation;
+import com.message_app.demo.chat.domain.Message;
+import com.message_app.demo.chat.application.DmService;
+import com.message_app.demo.chat.infrastructure.persistence.MessageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -19,6 +18,18 @@ import java.security.Principal;
 import java.time.Instant;
 @Controller
 public class DmWebSocketController {
+
+    // === WebSocket Destinations ===
+    private static final String QUEUE_DM_BASE = "/queue/dm/";
+    private static final String QUEUE_DM_OPEN = "/queue/dm/open";
+    //private static final String QUEUE_DM_NOTIFY = "/queue/dm/notify";
+    private static final String QUEUE_WHOAMI= "/queue/whoami";
+
+    // === MessageMapping Prefixes (Client to Server) ===
+    private static final String MAPPING_DM_SEND = "/dm{otherUserName}/send";
+    private static final String MAPPING_DM_OPEN = "/dm/{otherUserName}/open";
+    private static final String MAPPING_WHOAMI = "/whoami";
+
     private static final Logger log = LoggerFactory.getLogger(DmWebSocketController.class);
     public record ChatIn(String content) { }
     public record ChatOut(Long conversationId, String sender, String content, Instant sentAt) { }
@@ -34,7 +45,7 @@ public class DmWebSocketController {
         this.messages = messages;
 
     }
-    @MessageMapping("/dm/{otherUserName}/send")
+    @MessageMapping(MAPPING_DM_SEND)
     public void send(@DestinationVariable String otherUserName, ChatIn in, Principal principal) {
         String me = principal.getName();
         //long meId = userIdFromPrincipal(principal);
@@ -47,8 +58,8 @@ public class DmWebSocketController {
         m = messages.save(m);
 
         ChatOut out = new ChatOut(conv.getId(),me, m.getContent(), m.getSentAt());
-        broker.convertAndSendToUser(me,           "/queue/dm/" + conv.getId(), out);
-        broker.convertAndSendToUser(otherUserName, "/queue/dm/" + conv.getId(), out);
+        broker.convertAndSendToUser(me,           QUEUE_DM_BASE + conv.getId(), out);
+        broker.convertAndSendToUser(otherUserName, QUEUE_DM_BASE + conv.getId(), out);
 
        // long unread = dmService.unre
     }
@@ -60,8 +71,8 @@ public class DmWebSocketController {
 
     public record OpenOk(Long conversationId, String otherUsername) {}
     public record OpenErr(String errorCode, String message, String otherUsername) {}
-    @MessageMapping("/dm/{otherUserName}/open")
-    @SendToUser("/queue/dm/open")
+    @MessageMapping(MAPPING_DM_OPEN)
+    @SendToUser(QUEUE_DM_OPEN)
     public Object open(@DestinationVariable String otherUserName, Principal principal) {
         final String me = principal != null ? principal.getName() : "<null>";
         log.info("OPEN DM request me={} target={}", me, otherUserName);
@@ -82,8 +93,8 @@ public class DmWebSocketController {
     public String whoami(Principal p) {
         return p != null ? p.getName() : "<null>";
     }*/
-@MessageMapping("/whoami")
-@SendToUser("/queue/whoami")
+@MessageMapping(MAPPING_WHOAMI)
+@SendToUser(QUEUE_WHOAMI)
 public String whoami(Principal principal,
                      @Header("simpSessionId") String sid,
                      org.springframework.messaging.Message<?> message) {
@@ -103,10 +114,9 @@ public String whoami(Principal principal,
     return principal != null ? principal.getName() : "<null>";
 }
 
-
-
+//todo Fråga AI vad jag ska göra med denna
     @org.springframework.messaging.handler.annotation.MessageExceptionHandler
-    @SendToUser("/queue/dm/open")
+    @SendToUser(QUEUE_DM_OPEN)
     public OpenErr handleOpenErrors(Exception ex) {
         // You can inspect ex to tailor codes if you want
         return new OpenErr("OPEN_FAILED", ex.getMessage(), null);

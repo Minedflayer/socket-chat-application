@@ -1,4 +1,4 @@
-package com.message_app.demo;
+package com.message_app.demo.chat.api.dto;
 
 public class ChatMessage {
     private String content;

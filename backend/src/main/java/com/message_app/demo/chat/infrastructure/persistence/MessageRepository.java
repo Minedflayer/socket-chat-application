@@ -1,7 +1,7 @@
-package com.message_app.demo.rooms.repo;
+package com.message_app.demo.chat.infrastructure.persistence;
 
-import com.message_app.demo.rooms.domain.Message;
-import com.message_app.demo.rooms.domain.Conversation;
+import com.message_app.demo.chat.domain.Message;
+import com.message_app.demo.chat.domain.Conversation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

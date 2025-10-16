@@ -1,5 +1,6 @@
-package com.message_app.demo.security;
+package com.message_app.demo.auth.api;
 
+import com.message_app.demo.auth.infrastructure.security.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

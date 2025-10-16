@@ -1,4 +1,4 @@
-package com.message_app.demo.rooms.domain;
+package com.message_app.demo.chat.domain;
 
 import jakarta.persistence.*;
 

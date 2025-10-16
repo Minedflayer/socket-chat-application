@@ -1,4 +1,4 @@
-package com.message_app.demo.rooms.service;
+package com.message_app.demo.chat.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +33,6 @@ public class DebugWsController {
                 (viaHeader == null ? null : viaHeader.getName()));
 
         return principal != null ? principal.getName() : "<null>";
-    }*/
-//}
+    }
+}*/
 

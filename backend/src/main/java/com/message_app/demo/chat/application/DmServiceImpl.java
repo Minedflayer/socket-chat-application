@@ -1,32 +1,33 @@
-package com.message_app.demo.rooms.repo;
+package com.message_app.demo.chat.application;
+//Todo Add file to Git
 
-import com.message_app.demo.WebSocketEvents;
-import com.message_app.demo.rooms.domain.Conversation;
-import com.message_app.demo.rooms.domain.ConversationMember;
+import com.message_app.demo.chat.domain.Conversation;
+import com.message_app.demo.chat.domain.ConversationMember;
+import com.message_app.demo.chat.infrastructure.persistence.ConversationMemberRepository;
+import com.message_app.demo.chat.infrastructure.persistence.ConversationRepository;
+import com.message_app.demo.chat.infrastructure.persistence.MessageRepository;
+import com.message_app.demo.realtime.OnlineUserRegistry;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-
-
 @Service
-public class DmService {
+@Transactional
+ class DmServiceImpl implements DmService {
     private final ConversationRepository convs;
     private final ConversationMemberRepository members;
     private final MessageRepository messages;
+    private final OnlineUserRegistry online;
 
-    private final WebSocketEvents events;
-
-
-
-    public DmService(ConversationRepository convs, ConversationMemberRepository members, MessageRepository messages, WebSocketEvents events) {
+    DmServiceImpl(ConversationRepository convs, ConversationMemberRepository members, MessageRepository messages, OnlineUserRegistry online) {
         this.convs = convs;
         this.members = members;
         this.messages = messages;
-        this.events = events;
+        this.online = online;
+
     }
 
-    @Transactional
+    @Override
     public Conversation getOrCreateDm(String u1, String u2) {
         if (u1.equals(u2)) throw new IllegalArgumentException("DM with self not allowed");
         // stable key: alphabetical order
@@ -57,16 +58,17 @@ public class DmService {
     }
 
     //TODO Fix userExists function. Needs a variable to store users. Could probably use or add variable in ConversationMemberRepository
-   public boolean userExists(String username) {
+    @Override
+    public boolean userExists(String username) {
         if (username == null || username.isBlank()) return false;
         String u = username.trim();
         //if (u.isEmpty()) return false;
-       if (members.existsByUsernameIgnoreCase(u)) return true;
-       if (messages.existsBySenderIgnoreCase(u)) return true;
-       // ✅ treat any *connected* user as existing (optional but great for dev)
-       return events.isOnline(u); // maintain this set from connect/disconnect events
+        if (members.existsByUsernameIgnoreCase(u)) return true;
+        if (messages.existsBySenderIgnoreCase(u)) return true;
+        // ✅ treat any *connected* user as existing (optional but great for dev)
+        return online.isOnline(u); // maintain this set from connect/disconnect events
 
-       // Option B: fallback — has sent any message before
-       //return messages.existsBySenderIgnoreCase(u);
-   }
+        // Option B: fallback — has sent any message before
+        //return messages.existsBySenderIgnoreCase(u);
+    }
 }

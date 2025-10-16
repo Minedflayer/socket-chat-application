@@ -1,6 +1,6 @@
-package com.message_app.demo.rooms.repo;
+package com.message_app.demo.chat.infrastructure.persistence;
 
-import com.message_app.demo.rooms.domain.ConversationMember;
+import com.message_app.demo.chat.domain.ConversationMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

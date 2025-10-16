@@ -1,4 +1,4 @@
-package com.message_app.demo;
+package com.message_app.demo.realtime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

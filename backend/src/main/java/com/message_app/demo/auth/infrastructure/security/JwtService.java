@@ -1,4 +1,4 @@
-package com.message_app.demo.security;
+package com.message_app.demo.auth.infrastructure.security;
 
 
 import io.jsonwebtoken.*;
