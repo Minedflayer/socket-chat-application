@@ -1,6 +1,7 @@
-package com.message_app.demo.security;
+package com.message_app.demo.chat.infrastructure.ws;
 // Authenticate on STOMP CONNECT (ChannelInterceptor)
 
+import com.message_app.demo.auth.infrastructure.security.JwtService;
 import org.slf4j.Logger; import org.slf4j.LoggerFactory;
 import org.springframework.messaging.*;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -9,14 +10,9 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 
 
 /**
@@ -34,7 +30,6 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     private static final String AUTH_KEY = "auth";
     private static final Logger log = LoggerFactory.getLogger(StompAuthChannelInterceptor.class);
     private final JwtService jwt;
-
     private final java.util.concurrent.ConcurrentMap<String, Principal> bySession = new java.util.concurrent.ConcurrentHashMap<>();
 
     public StompAuthChannelInterceptor(JwtService jwt) { this.jwt = jwt; }

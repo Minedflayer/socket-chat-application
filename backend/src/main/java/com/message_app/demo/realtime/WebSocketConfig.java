@@ -1,6 +1,7 @@
-package com.message_app.demo;
+package com.message_app.demo.realtime;
 
-import com.message_app.demo.security.StompAuthChannelInterceptor;
+import com.message_app.demo.chat.infrastructure.ws.ClientIdMdcInterceptor;
+import com.message_app.demo.chat.infrastructure.ws.StompAuthChannelInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

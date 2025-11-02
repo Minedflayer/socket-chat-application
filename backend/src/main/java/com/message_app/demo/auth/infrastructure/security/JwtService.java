@@ -1,4 +1,4 @@
-package com.message_app.demo.security;
+package com.message_app.demo.auth.infrastructure.security;
 
 
 import io.jsonwebtoken.*;
@@ -48,7 +48,6 @@ public class JwtService {
         log.info("JwtService: extracted username='{}' from JWT id={}", username, jws.getBody().getId());
         return jws.getBody().getSubject();
     }
-
 
     /**
      * Extract "roles" claim as a List<String>.
