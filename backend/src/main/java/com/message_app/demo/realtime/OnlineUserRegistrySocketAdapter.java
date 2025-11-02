@@ -2,7 +2,6 @@ package com.message_app.demo.realtime;
 
 import org.springframework.stereotype.Component;
 
-// todo: Add file to git.
 @Component
  class OnlineUserRegistrySocketAdapter implements OnlineUserRegistry {
     private final WebSocketEvents events;

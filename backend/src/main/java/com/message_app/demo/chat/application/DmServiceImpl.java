@@ -14,19 +14,38 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
  class DmServiceImpl implements DmService {
+
+    /**
+     * Service responsible for:
+     *  - Finding or creating a *direct message* (DM) conversation between two users
+     *  - Basic user existence checks used by the DM open flow
+     *
+     * Transactionality:
+     *  - Class-level @Transactional ensures the create path is atomic
+     *    (e.g., create Conversation + two ConversationMember rows).
+     *
+     * Concurrency:
+     *  - We build a canonical dmKey "a:b" (alphabetical by username, case-insensitive)
+     *    to guarantee *one* DM per user pair.
+     *  - If two requests race, the unique constraint at the DB layer throws
+     *    DataIntegrityViolationException, which we catch and then re-read.
+     */
     private final ConversationRepository convs;
     private final ConversationMemberRepository members;
     private final MessageRepository messages;
-    private final OnlineUserRegistry online;
+    private final OnlineUserRegistry online; // Tracks connected users
 
     DmServiceImpl(ConversationRepository convs, ConversationMemberRepository members, MessageRepository messages, OnlineUserRegistry online) {
         this.convs = convs;
         this.members = members;
         this.messages = messages;
         this.online = online;
-
     }
 
+    /**
+     * Resolve an existing DM or create a new one for (u1, u2).
+     * @throws IllegalArgumentException if a user tries to DM themselves.
+     */
     @Override
     public Conversation getOrCreateDm(String u1, String u2) {
         if (u1.equals(u2)) throw new IllegalArgumentException("DM with self not allowed");
@@ -38,6 +57,10 @@ import org.springframework.stereotype.Service;
         return convs.findByDmKey(key).orElseGet(() -> createDm(key, a, b));
     }
 
+    /**
+     * Create the conversation + two membership rows, with a race-safe fallback.
+     * If another thread already created the conversation, we look it up again.
+     */
     private Conversation createDm(String key, String a, String b) {
         try {
             Conversation c = new Conversation();
@@ -58,6 +81,17 @@ import org.springframework.stereotype.Service;
     }
 
     //TODO Fix userExists function. Needs a variable to store users. Could probably use or add variable in ConversationMemberRepository
+    /**
+     * Lightweight existence check used before opening a DM:
+     *  - Accepts any of:
+     *      • Users who appear in ConversationMember (ever had a DM created)
+     *      • Users who have sent messages before
+     *      • Users currently online (from the in-memory OnlineUserRegistry)
+     *
+     * This is pragmatic for development: you can DM an online user even if they
+     * have no DB footprint yet. Tighten the policy later if you introduce a proper
+     * user directory / account table.
+     */
     @Override
     public boolean userExists(String username) {
         if (username == null || username.isBlank()) return false;

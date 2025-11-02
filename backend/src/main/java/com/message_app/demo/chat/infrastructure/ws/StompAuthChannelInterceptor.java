@@ -30,7 +30,6 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
     private static final String AUTH_KEY = "auth";
     private static final Logger log = LoggerFactory.getLogger(StompAuthChannelInterceptor.class);
     private final JwtService jwt;
-
     private final java.util.concurrent.ConcurrentMap<String, Principal> bySession = new java.util.concurrent.ConcurrentHashMap<>();
 
     public StompAuthChannelInterceptor(JwtService jwt) { this.jwt = jwt; }

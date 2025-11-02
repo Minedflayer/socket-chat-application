@@ -49,7 +49,6 @@ public class JwtService {
         return jws.getBody().getSubject();
     }
 
-
     /**
      * Extract "roles" claim as a List<String>.
      * Returns an empty list if not present.
