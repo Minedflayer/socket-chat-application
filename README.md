@@ -69,9 +69,9 @@ backend/
 - └── application.yml # Spring Boot configuration
 
 frontend/
-├── src/ # React + Vite source
-├── index.html
-└── package.json
+- ├── src/ # React + Vite source
+- ├── index.html
+- └── package.json
 
 ## 🧪 Running the Project
 
@@ -79,3 +79,13 @@ frontend/
 ```bash
 git clone https://github.com/<your-username>/socket-chat-application.git
 cd socket-chat-application
+
+### 2. Backend setup
+
+- **Create and add your own token**
+- Generate key in Git Bash: openssl rand -base64 32
+- Add the key in the .env file
+
+- **Run the backend**
+- cd backend
+- mvn spring-boot:run
