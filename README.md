@@ -83,8 +83,12 @@ cd socket-chat-application
 
 ### 2. **Backend setup**
 - **Create and add your own token**
-- Generate key in Git Bash: openssl rand -base64 32
+- Generate key in Git Bash:
+
+´´´bash
+openssl rand -base64 32
 - Add the key in the .env file
+´´´
 
 - **Run the backend**
 - cd backend
