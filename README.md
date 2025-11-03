@@ -80,6 +80,7 @@ frontend/
 git clone https://github.com/<your-username>/socket-chat-application.git
 cd socket-chat-application
 
+---
 
 ### 2. **Backend setup**
 - **Create and add your own token**
