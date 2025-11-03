@@ -78,9 +78,9 @@ frontend/
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/<your-username>/socket-chat-application.git
-cd socket-chat-application
+cd socket-chat-application´´´
 
-### 2. Backend setup
+### 2. **Backend setup**
 
 - **Create and add your own token**
 - Generate key in Git Bash: openssl rand -base64 32
