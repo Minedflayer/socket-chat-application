@@ -87,8 +87,9 @@ cd socket-chat-application
 
 ```bash
 openssl rand -base64 32
-- Add the key in the .env file
 ```
+- Add the key in the .env file
+
 
 - **Run the backend**
 ```bash
