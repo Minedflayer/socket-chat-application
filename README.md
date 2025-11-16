@@ -82,7 +82,7 @@ cd socket-chat-application
 ```
 
 ### 2. **Backend setup**
-- **Create and add your own token**
+- Create and add your own token
 - Generate key in Git Bash:
 
 ```bash
