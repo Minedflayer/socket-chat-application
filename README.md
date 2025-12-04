@@ -107,10 +107,10 @@ Handles the stateless authentication mechanism.
 The heart of the messaging logic.
 * **`api`**:
 * **DTO**
-* *`ChatMessage`:
-* *`MessageDto`:
-    * `DmWebSocketController`: The primary STOMP endpoint. It handles sending/receiving DMs and "opening" conversations using a Request-Reply pattern.
-    * `ChatController`: Handles legacy global chat broadcasts.
+   * `ChatMessage`:
+   * `MessageDto`:
+* `DmWebSocketController`: The primary STOMP endpoint. It handles sending/receiving DMs and "opening" conversations using a Request-Reply pattern.
+* `ChatController`: Handles legacy global chat broadcasts.
 * **`application`**:
     * `DmService`: Encapsulates business logic, such as ensuring a user exists and generating unique "Conversation Keys" (e.g., `alice:bob`) to prevent duplicate chats.
 * **`domain`**:
