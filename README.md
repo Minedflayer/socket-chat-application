@@ -105,10 +105,10 @@ Handles the stateless authentication mechanism.
 
 #### 2. `chat` (Core Domain)
 The heart of the messaging logic.
-* **`api`**:
-* **DTO**
-   * `ChatMessage`:
-   * `MessageDto`:
+* **`api`**: 
+   * **DTO**
+      * `ChatMessage`:
+      * `MessageDto`:
 * `DmWebSocketController`: The primary STOMP endpoint. It handles sending/receiving DMs and "opening" conversations using a Request-Reply pattern.
 * `ChatController`: Handles legacy global chat broadcasts.
 * **`application`**:
