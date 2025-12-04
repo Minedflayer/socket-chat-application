@@ -57,17 +57,6 @@ This project was created to gain practical experience with:
 
 ---
 
-## ⚙️ Project Structure
-
-backend/
-- ├── src/main/java/com/message_app/demo/
-- │ ├── chat/api/ # Controllers (WebSocket endpoints)
-- │ ├── chat/application/ # Services (business logic)
-- │ ├── chat/domain/ # JPA entities (Conversation, Message, etc.)
-- │ └── chat/infrastructure/ # Repository interfaces
-- └── resources/
-- └── application.yml # Spring Boot configuration
-
 frontend/
 - ├── src/ # React + Vite source
 - ├── index.html
@@ -97,7 +86,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-***
+---
 
 ## 🏗️ Architecture & Code Structure
 
