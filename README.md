@@ -96,11 +96,6 @@ openssl rand -base64 32
 cd backend
 mvn spring-boot:run
 ```
-This is a great initiative. A well-documented architecture section sets your project apart because it shows you understand *how* your system is designed, not just that you wrote code that runs.
-
-Based on the file structure image and the code you provided, here is a professional **"Architecture & Code Structure"** section ready to be dropped into your `README.md`.
-
-I have structured it to highlight your use of **Domain-Driven Design (DDD)** principles and the specific complexity of **WebSocket Security**.
 
 ***
 
