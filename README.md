@@ -96,3 +96,87 @@ openssl rand -base64 32
 cd backend
 mvn spring-boot:run
 ```
+This is a great initiative. A well-documented architecture section sets your project apart because it shows you understand *how* your system is designed, not just that you wrote code that runs.
+
+Based on the file structure image and the code you provided, here is a professional **"Architecture & Code Structure"** section ready to be dropped into your `README.md`.
+
+I have structured it to highlight your use of **Domain-Driven Design (DDD)** principles and the specific complexity of **WebSocket Security**.
+
+***
+
+## 🏗️ Architecture & Code Structure
+
+This project follows a **Layered Architecture** with a lean implementation of **Domain-Driven Design (DDD)** principles. The backend is structured to separate the "Web" layer (Controllers) from the "Business" layer (Services) and the "Persistence" layer (Repositories).
+
+### 📂 Backend Package Breakdown
+
+The backend is organized into three primary modules within `com.message_app.demo`:
+
+#### 1. `auth` (Security & Identity)
+Handles the stateless authentication mechanism.
+* **`api`**: Contains the `AuthController` for HTTP-based login.
+* **`infrastructure.security`**:
+    * `JwtService`: Responsible for signing and parsing JSON Web Tokens (HS256).
+    * `HttpSecurityConfig`: Configures Spring Security to allow public access to auth endpoints while securing the rest.
+
+#### 2. `chat` (Core Domain)
+The heart of the messaging logic.
+* **`api`**:
+    * `DmWebSocketController`: The primary STOMP endpoint. It handles sending/receiving DMs and "opening" conversations using a Request-Reply pattern.
+    * `ChatController`: Handles legacy global chat broadcasts.
+* **`application`**:
+    * `DmService`: Encapsulates business logic, such as ensuring a user exists and generating unique "Conversation Keys" (e.g., `alice:bob`) to prevent duplicate chats.
+* **`domain`**:
+    * **Entities**: `Conversation`, `ConversationMember`, and `Message`.
+    * **Logic**: The `Conversation` entity uses a canonical key strategy (alphabetical sorting of usernames) to ensure uniqueness at the database level.
+* **`infrastructure`**:
+    * `ws`: Contains the `StompAuthChannelInterceptor`. This is a critical component that intercepts the initial WebSocket **CONNECT** frame to validate the JWT header before a session is established.
+    * `persistence`: Spring Data JPA repositories.
+
+#### 3. `realtime` (State Management)
+* Manages ephemeral state, such as tracking which users are currently online via `WebSocketEvents` (Connect/Disconnect listeners).
+
+---
+
+### 📡 The Communication Protocol (STOMP over WebSockets)
+
+Unlike standard REST APIs, this application relies on a persistent, bi-directional connection.
+
+1.  **The Handshake:** The client connects via SockJS to `/chat`. The JWT is passed in the STOMP `CONNECT` headers.
+2.  **The Interceptor:** The backend `StompAuthChannelInterceptor` intercepts this frame, decodes the JWT, and assigns a Spring Security `Principal` to the WebSocket session.
+3.  **The Flow:**
+    * **Inbound (Client → Server):** Messages are sent to `/app/dm/...`.
+    * **Processing:** The controller persists the message to the H2 database.
+    * **Outbound (Server → Client):** The server pushes the message to specific user queues: `/user/queue/dm/{conversationId}`.
+
+---
+
+### 💾 Database Schema Design
+
+The application uses a relational model optimized for lookup speed:
+
+| Entity | Description |
+| :--- | :--- |
+| **Conversation** | The root entity. Contains a unique `dmKey` (e.g., `"alice:bob"`) to ensure only one DM thread exists per pair of users. |
+| **ConversationMember** | A join table linking Users (by string username) to Conversations. Indexed to quickly find "All chats for Alice". |
+| **Message** | Stores the content, sender, and timestamp. Linked to a Conversation. |
+
+---
+
+### ⚛️ Frontend Architecture (React)
+
+The frontend uses a **Hybrid Data Loading** strategy to ensure performance:
+
+1.  **Initialization:** Uses `@stomp/stompjs` to establish the connection using the JWT from local storage.
+2.  **Opening a Chat:**
+    * Uses a **Request/Reply** pattern over WebSockets to ask the server for a `conversationId` based on a username.
+    * Once the ID is returned, it performs a standard **REST GET** request to fetch historical messages (pagination ready).
+3.  **Real-time Updates:** Subscribes to `/user/queue/dm/{id}` to receive new messages instantly without polling.
+
+---
+
+### 💡 Key Design Decisions
+
+* **Canonical Keys:** Instead of complex queries to check if a DM exists between two users, we generate a deterministic key (`userA:userB` sorted alphabetically). This allows us to rely on database unique constraints to prevent duplicates.
+* **Map vs Array:** The frontend uses React `Map` state for conversation storage. This provides O(1) access time when updating a specific conversation thread, regardless of how many active chats are open.
+* **Security at the Gate:** Security is handled at the *Channel Interceptor* level, meaning unauthenticated users cannot even subscribe to a topic, let alone send a message.
