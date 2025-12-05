@@ -51,5 +51,4 @@ public class Conversation {
     public Long getId() {
         return id;
     }
-
 }

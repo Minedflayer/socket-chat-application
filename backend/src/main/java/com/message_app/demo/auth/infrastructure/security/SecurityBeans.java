@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class SecurityBeans {
     @Bean
     public JwtService jwtService(@Value("${jwt.secret}") String secret) {
+        System.out.println("Loaded JWT secret from Spring: " + secret);
         return new JwtService(secret);
     }
 }

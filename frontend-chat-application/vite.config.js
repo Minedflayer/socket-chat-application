@@ -8,7 +8,8 @@ export default defineConfig({
     global: 'window',
   },
   server: {
-    proxy: {  
+    proxy: {
+      '/api': 'http://localhost:8080',  
       "/auth": "http://localhost:8080",
       "/chat": {
         //target: "http://localhost:8080", // Spring Boot backend

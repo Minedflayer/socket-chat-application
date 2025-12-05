@@ -3,6 +3,7 @@ package com.message_app.demo.auth.infrastructure.security;
 
 import io.jsonwebtoken.*;
 //import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,8 @@ public class JwtService {
      * @param secret - must be >= 256 bits for HS256
      */
     public JwtService(String secret) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        //this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret)); // decode base64 before creating a key.
     }
 
     /**
@@ -46,7 +48,8 @@ public class JwtService {
     public String userName(Jws<Claims> jws) {
         String username = jws.getBody().getSubject();
         log.info("JwtService: extracted username='{}' from JWT id={}", username, jws.getBody().getId());
-        return jws.getBody().getSubject();
+        //return jws.getBody().getSubject();
+        return username;
     }
 
     /**

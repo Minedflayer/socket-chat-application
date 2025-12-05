@@ -5,6 +5,10 @@ import com.message_app.demo.chat.domain.Conversation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 /**
  * Repository for {@link Message} entities.
@@ -29,6 +33,14 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      * @param p Spring Data {@link Pageable} controlling page size and number.
      * @return a {@link Page} of messages ordered by `sentAt` ascending.
      */
+    @Query("""
+        select m from Message m
+        where m.conversation.id = :convId
+        order by m.sentAt desc
+    """)
+    List<Message> findTopByConversationIdOrderBySentAtDesc(@Param("convId") Long convId, Pageable pageable);
+
+
     Page<Message> findByConversationOrderBySentAtAsc(Conversation c, Pageable p);
 
     /**

@@ -25,8 +25,6 @@ public class WebSocketSecurityConfig extends AbstractSecurityWebSocketMessageBro
                 .simpSubscribeDestMatchers("/topic/**", "/queue/**").authenticated() // subscribing requires auth
                 .anyMessage().authenticated();
     }
-
-
     @Override
     protected boolean sameOriginDisabled() {
         // allow cross-origin in dev

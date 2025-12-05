@@ -43,5 +43,4 @@ public class WebSocketEvents {
     }
 
     public static boolean isOnline(String u) { return onlineUsers.contains(u); }
-
 }
