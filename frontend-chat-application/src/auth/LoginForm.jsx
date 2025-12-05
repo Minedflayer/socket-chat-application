@@ -15,7 +15,11 @@ export default function LoginForm({ onLogin }) {
     }
   };
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
+      <div className="w-full max-w-sm rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl backdrop-blur-sm">
+
+    
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
       <input
         type="text"
         placeholder="Username"
@@ -30,5 +34,7 @@ export default function LoginForm({ onLogin }) {
       />
       <button type="submit">Login</button>
     </form>
+      </div>
+    </div>
   );
 }

@@ -32,6 +32,9 @@ public class Message {
     public Long getId() {
         return id;
     }
+   /* public Long getSenderId() {
+        return sender;
+    }*/
     public Conversation getConversation() {
         return conversation;
     }
@@ -54,4 +57,7 @@ public class Message {
         this.sentAt = sentAt;
     }
 
+    public String getSenderId() {
+        return sender;
+    }
 }
