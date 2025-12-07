@@ -167,9 +167,3 @@ The frontend uses a **Hybrid Data Loading** strategy to ensure performance:
 3.  **Real-time Updates:** Subscribes to `/user/queue/dm/{id}` to receive new messages instantly without polling.
 
 ---
-
-### 💡 Key Design Decisions
-
-* **Canonical Keys:** Instead of complex queries to check if a DM exists between two users, we generate a deterministic key (`userA:userB` sorted alphabetically). This allows us to rely on database unique constraints to prevent duplicates.
-* **Map vs Array:** The frontend uses React `Map` state for conversation storage. This provides O(1) access time when updating a specific conversation thread, regardless of how many active chats are open.
-* **Security at the Gate:** Security is handled at the *Channel Interceptor* level, meaning unauthenticated users cannot even subscribe to a topic, let alone send a message.
