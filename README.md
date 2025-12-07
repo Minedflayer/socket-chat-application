@@ -18,6 +18,11 @@ A real-time chat platform built with **Spring Boot**, **WebSockets (STOMP)**, an
 This project was created as a learning exercise to explore **socket-based communication**, **backend–frontend integration**, and **structuring larger applications**.
 
 ---
+## 🛠️ Prerequisites
+
+Before you begin, ensure you have the following installed:
+* **Java Development Kit (JDK) 17**
+---
 
 ## 🧩 Tech Stack
 
