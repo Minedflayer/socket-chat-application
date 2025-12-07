@@ -99,7 +99,7 @@ import org.springframework.stereotype.Service;
         //if (u.isEmpty()) return false;
         if (members.existsByUsernameIgnoreCase(u)) return true;
         if (messages.existsBySenderIgnoreCase(u)) return true;
-        // ✅ treat any *connected* user as existing (optional but great for dev)
+        // treat any *connected* user as existing (great for dev)
         return online.isOnline(u); // maintain this set from connect/disconnect events
 
         // Option B: fallback — has sent any message before

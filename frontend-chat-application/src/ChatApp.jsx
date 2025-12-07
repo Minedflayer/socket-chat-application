@@ -10,7 +10,7 @@ import SockJS from "sockjs-client";
 import { createStompLogger } from "./logging/stomplogger";
 import { createLogger } from "./logging/logger";
 import DiagnosticsPanel from "./diagnostics/DiagnosticsPanel";
-import { getToken } from "./auth/AuthService";
+import { getToken, getCurrentUser } from "./auth/AuthService";
 
 /**
  * Single STOMP connection that handles:
@@ -25,6 +25,8 @@ export default function ChatApp() {
   const connectionIdRef = useRef(Math.random().toString(36).slice(2, 8));
   const log = createLogger("CHAT", connectionIdRef);
   const clientRef = useRef(null);
+
+  const [currentUser, setCurrentUser] = useState(()=> getCurrentUser());
 
   const [status, setStatus] = useState("disconnected");
   const [latestError, setLatestError] = useState(null);
@@ -160,7 +162,6 @@ export default function ChatApp() {
       });
       // Subscribe Notify
       client.subscribe("/user/queue/dm/notify", (m) => {
-        // Fixed queue name
         try {
           const n = JSON.parse(m.body);
           setNotifications((prev) => [...prev, n]);
@@ -459,30 +460,51 @@ export default function ChatApp() {
 
         {/* Messages */}
         <div
-          ref={messageScrollRef}
-          className="flex-1 overflow-y-auto p-6 space-y-4"
+            ref={messageScrollRef}
+            className="flex-1 overflow-y-auto p-6 space-y-4"
         >
-          {messagesForView.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-50">
-              <p>No messages yet</p>
-            </div>
-          ) : (
-            messagesForView.map((m, i) => (
-              <div key={i} className="group bg-blue-600">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="font-medium text-slate-300 text-sm hover:underline cursor-pointer">
-                    {m.sender || "Unknown"}
-                  </span>
-                  <span className="text-[10px] text-slate-600">
-                    {m.sentAt ? new Date(m.sentAt).toLocaleTimeString() : ""}
-                  </span>
+             {messagesForView.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-50">
+                    <p>No messages yet</p>
                 </div>
-                <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-                  {m.content}
-                </p>
-              </div>
-            ))
-          )}
+             ) : (
+                messagesForView.map((m, i) => {
+                    // --- CHANGED: Check if message is from me ---
+                    const isMe = m.sender === currentUser;
+
+                    return (
+                        // --- CHANGED: Added flex alignment logic (items-end for me, items-start for them) ---
+                        <div
+                            key={i}
+                            className={`group flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                        >
+                            {/* --- CHANGED: Metadata alignment (row-reverse if me) --- */}
+                            <div className={`flex items-baseline gap-2 mb-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                <span className="font-medium text-slate-400 text-xs">
+                                    {m.sender || 'Unknown'}
+                                </span>
+                                <span className="text-[10px] text-slate-600">
+                                    {m.sentAt ? new Date(m.sentAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                                </span>
+                            </div>
+
+                            {/* --- CHANGED: Bubble styling ---
+                                - isMe: bg-blue-600, rounded-br-none (pointy bottom right)
+                                - !isMe: bg-slate-800, rounded-bl-none (pointy bottom left)
+                             */}
+                            <div
+                                className={`px-4 py-2 text-sm leading-relaxed whitespace-pre-wrap max-w-[85%] rounded-2xl ${
+                                    isMe
+                                        ? "bg-blue-600 text-white rounded-br-none"
+                                        : "bg-slate-800 text-slate-200 rounded-bl-none"
+                                }`}
+                            >
+                                {m.content}
+                            </div>
+                        </div>
+                    );
+                })
+             )}
         </div>
 
         {/* Input Area */}
