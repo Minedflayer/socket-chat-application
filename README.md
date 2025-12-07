@@ -15,13 +15,14 @@ If you are developing a production application, we recommend using TypeScript wi
 # ⚡ Socket Chat Application
 
 A real-time chat platform built with **Spring Boot**, **WebSockets (STOMP)**, and **JWT authentication**, featuring both a **public chat room** and **private direct messages (DMs)**.  
-This project was created as a learning exercise to explore **socket-based communication**, **backend–frontend integration**, and **structuring larger applications**.
+This project was created as a learning exercise to explore **Spring Boot**, **socket-based communication**, **backend–frontend integration**, and **structuring larger applications**.
 
 ---
 ## 🛠️ Prerequisites
 
 Before you begin, ensure you have the following installed:
-* **Java Development Kit (JDK) 17**
+* **Java Development Kit (JDK) 19**
+* **Java version: 17**
 ---
 
 ## 🧩 Tech Stack
