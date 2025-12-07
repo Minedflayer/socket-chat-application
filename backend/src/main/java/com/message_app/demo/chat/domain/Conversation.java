@@ -16,7 +16,6 @@ import jakarta.persistence.*;
 
 @Entity @Table(name="conversations")
 public class Conversation {
-    /** Surrogate primary key (auto-increment on the DB). */
 
     /**
      * Conversation type (e.g., "DM"). Kept tiny (length=8) for easy indexing later.
