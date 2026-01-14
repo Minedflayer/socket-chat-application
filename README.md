@@ -91,6 +91,8 @@ openssl rand -base64 32
 cd backend
 mvn spring-boot:run
 ```
+*If you want to run the backend in vs code, install Spring Boot Dashboard extension.*
+*Open dashboard -> right-click project: Run*
 
 ---
 
