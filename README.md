@@ -116,8 +116,8 @@ The heart of the messaging logic.
 * **`api`**: 
    * **dto**
       * `MessageDto`: Dto that carries essential details of a chat message.
-* `DmWebSocketController`: The primary STOMP endpoint. It handles sending/receiving DMs and "opening" conversations using a Request-Reply pattern.
-* `ChatController`: Handles legacy global chat broadcasts.
+* `DmWebSocketController`: The primary STOMP endpoint. It handles sending/receiving DMs and "opening" conversations using a Request-Reply pattern. Note: Currently, this controller also writes a local backup of every message to a message_log.txt file on the server for debugging purposes.
+* `ChatController`: Handles legacy global chat broadcasts and exposes REST endpoints (e.g., GET /api/dm/{conversationId}/messages) to fetch historical message paginations.
 * **`application`**:
     * `DmService`: Encapsulates business logic, such as ensuring a user exists and generating unique "Conversation Keys" (e.g., `alice:bob`) to prevent duplicate chats.
 * **`domain`**:
@@ -125,10 +125,14 @@ The heart of the messaging logic.
     * **Logic**: The `Conversation` entity uses a canonical key strategy (alphabetical sorting of usernames) to ensure uniqueness at the database level.
 * **`infrastructure`**:
     * `ws`: Contains the `StompAuthChannelInterceptor`. This is a critical component that intercepts the initial WebSocket **CONNECT** frame to validate the JWT header before a session is established.
+      * ClientIdMdcInterceptor: A channel interceptor that extracts the x-client-id and adds it to the Mapped Diagnostic Context (MDC) for structured, thread-safe logging.Upd
+      * WebSocketSecurityConfig: Configures Spring Security rules for STOMP, ensuring that subscribing or sending to /app/ and /topic/ destinations requires authentication.
     * `persistence`: Spring Data JPA repositories.
 
 #### 3. `realtime` (State Management)
-* Manages ephemeral state, such as tracking which users are currently online via `WebSocketEvents` (Connect/Disconnect listeners).
+Manages ephemeral state, such as tracking which users are currently online via `WebSocketEvents` (Connect/Disconnect listeners).
+* WebSocketConfig: The core configuration class that enables the Simple Broker (/topic, /queue) and registers the /chat endpoint with SockJS.
+* WebSocketEvents: Tracks which users are currently online using STOMP Connect/Disconnect event listeners.
 
 ---
 
