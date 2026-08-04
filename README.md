@@ -12,7 +12,7 @@ Currently, two official plugins are available:
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
 
-# ⚡ Socket Chat Application
+## ⚡ Socket Chat Application
 
 A real-time chat platform built with **Spring Boot**, **WebSockets (STOMP)**, and **JWT authentication**, featuring both a **public chat room** and **private direct messages (DMs)**.  
 This project was created as a learning exercise to explore **Spring Boot**, **socket-based communication**, **backend–frontend integration**, and **structuring larger applications**.
