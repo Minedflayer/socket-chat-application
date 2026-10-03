@@ -1,172 +1,149 @@
-# React + Vite
+# Socket Chat Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A learning project for **one-to-one direct messages**, built with React and Spring Boot. Two connected users can open a conversation, exchange messages in real time, and reopen recent history while the backend stays running.
 
-Currently, two official plugins are available:
+This is a **local development prototype**. It uses development usernames and in-memory H2 storage. Real accounts, private-data authorization, durable storage, and automatic connection recovery are later milestones.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What works
 
-## Expanding the ESLint configuration
+- A DM-only interface: open, select, and close conversations using a resizable sidebar.
+- Messages delivered to both participants over STOMP/SockJS, with sender and timestamp.
+- The latest 50 saved messages loaded when reopening a conversation. Closing a conversation does not delete it.
+- Saved login survives a frontend reload until the token expires. The conversation list and drafts are local component state and reset on reload.
+- Blank messages are rejected; content is trimmed and limited to 2,000 characters on the client and backend.
+- Enter sends; Shift + Enter inserts a newline. A Send button is also available.
+- Open/send controls are disabled while disconnected. A publishing failure keeps the draft and displays an error.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+There is no global chat or room flow. Both users must open the conversation to subscribe to live messages; the app does not automatically populate an inbox or open incoming conversations.
 
+## Requirements
 
-## ⚡ Socket Chat Application
+- JDK **17 or newer**; the Maven project targets Java 17.
+- Node.js **20.19+ on the 20.x line, or 22.12+**, as required by the locked Vite dependency; npm and Git.
+- Internet access for initial dependency installation. Maven 3.9.9 is downloaded by the included wrapper; a separate Maven installation is optional.
 
-A real-time chat platform built with **Spring Boot**, **WebSockets (STOMP)**, and **JWT authentication**, featuring both **private direct messages (DMs)**.  
-This project was created as a learning exercise to explore **Spring Boot**, **socket-based communication**, **backend–frontend integration**, and **structuring larger applications**.
+The backend uses Spring Boot 3.5.4, Spring WebSocket, Spring Security, Spring Data JPA, Jakarta Validation, H2, and JJWT 0.11.5. The frontend uses React 19, Vite 7, Tailwind CSS 3, `@stomp/stompjs`, and `sockjs-client`.
 
----
-## 🛠️ Prerequisites
+## Run locally
 
-Before you begin, ensure you have the following installed:
-* **Java Development Kit (JDK) 19**
-* **Java version: 17**
----
+### 1. Clone
 
-## 🧩 Tech Stack
-
-### Backend
-- **Spring Boot** (WebSocket + STOMP)
-- **Spring Security** (JWT Authentication)
-- **Spring Data JPA** (Persistence layer)
-- **MySQL** (Database; H2 can be used for testing)
-- **Maven** (Build system)
-
-### Frontend
-- **React + Vite**
-- **TailwindCSS**
-- Optional: simple HTML client for testing WebSocket connections
-
----
-
-## 🚀 Features 
-- **Private Direct Messages (DMs)** – one-to-one conversations handled over secure user queues.  
-- **JWT Authentication** – secure identification of connected users via token validation.  
-- **Message Persistence** – messages are stored in a relational database (MySQL/H2).  
-- **Online User Tracking** – optional `OnlineUserRegistry` keeps track of active sessions.  
-- **Layered Architecture** – clean separation between API, Application, Domain, and Infrastructure layers.
-
----
-
-## 🧠 Learning Goals
-
-This project was created to gain practical experience with:
-- WebSocket communication (STOMP protocol)
-- Spring Boot configuration and modular design
-- JWT security integration
-- Building and structuring larger, multi-layered applications
-- Connecting a React frontend to a WebSocket backend
-
----
-
-frontend/
-- ├── src/ # React + Vite source
-- ├── index.html
-- └── package.json
-
-## 🧪 Running the Project
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/<your-username>/socket-chat-application.git
+```sh
+git clone https://github.com/Minedflayer/socket-chat-application.git
 cd socket-chat-application
 ```
 
-### 2. **Backend setup**
-- Create and add your own token
-- Generate key in Git Bash:
+### 2. Start the backend
 
-```bash
-openssl rand -base64 32
+Set `JWT_SECRET` to a Base64-encoded signing key containing at least **32 random bytes**. The configured fallback `change-me-in-dev` is not a usable key.
+
+**Windows PowerShell**, from the repository root:
+
+```powershell
+cd backend
+$jwtBytes = New-Object byte[] 32
+$jwtRng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+$jwtRng.GetBytes($jwtBytes)
+$env:JWT_SECRET = [Convert]::ToBase64String($jwtBytes)
+$jwtRng.Dispose()
+.\mvnw.cmd spring-boot:run
 ```
-- Add the key in the .env file
 
+**Bash**, from the repository root (requires OpenSSL):
 
-- **Run the backend**
 ```bash
 cd backend
-mvn spring-boot:run
+export JWT_SECRET="$(openssl rand -base64 32)"
+bash ./mvnw spring-boot:run
 ```
-- *If you want to run the backend in vs code, install Spring Boot Dashboard extension.*
-- *Open dashboard -> right-click project: Run*
 
----
+The wrapper is invoked through `bash` because its Git executable bit is not set. For a reusable local key, `spring-dotenv` also supports `backend/.env` containing `JWT_SECRET=<your-generated-base64-key>`. Run from `backend/`; this file is ignored by Git. Changing the key invalidates existing token signatures.
 
-## 🏗️ Architecture & Code Structure
+The backend listens on **8080**. `GET http://localhost:8080/healthz` should return `ok`.
 
-This project follows a **Layered Architecture** with a lean implementation of **Domain-Driven Design (DDD)** principles. The backend is structured to separate the "Web" layer (Controllers) from the "Business" layer (Services) and the "Persistence" layer (Repositories).
+### 3. Start the frontend
 
-### 📂 Backend Package Breakdown
+In a second terminal, from the repository root:
 
-The backend is organized into three primary modules within `com.message_app.demo`:
+```sh
+cd frontend-chat-application
+npm ci
+npm run dev
+```
 
-#### 1. `auth` (Security & Identity)
-Handles the stateless authentication mechanism.
-* **`api`**: Contains the `AuthController` for HTTP-based login.
-* **`infrastructure.security`**:
-    * `JwtService`: Responsible for signing and parsing JSON Web Tokens (HS256).
-    * `HttpSecurityConfig`: Configures Spring Security to allow public access to auth endpoints while securing the rest.
+Open the URL printed by Vite, normally `http://localhost:5173`. Vite forwards `/auth`, `/api`, and `/chat` to the backend, including WebSocket traffic. Keep both servers running.
 
-#### 2. `chat` (Core Domain)
-The heart of the messaging logic.
-* **`api`**: 
-   * **dto**
-      * `MessageDto`: Dto that carries essential details of a chat message.
-* `DmWebSocketController`: The primary STOMP endpoint. It handles sending/receiving DMs and "opening" conversations using a Request-Reply pattern. Note: Currently, this controller also writes a local backup of every message to a message_log.txt file on the server for debugging purposes.
-* `ChatController`: Handles legacy global chat broadcasts and exposes REST endpoints (e.g., GET /api/dm/{conversationId}/messages) to fetch historical message paginations.
-* **`application`**:
-    * `DmService`: Encapsulates business logic, such as ensuring a user exists and generating unique "Conversation Keys" (e.g., `alice:bob`) to prevent duplicate chats.
-* **`domain`**:
-    * **Entities**: `Conversation`, `ConversationMember`, and `Message`.
-    * **Logic**: The `Conversation` entity uses a canonical key strategy (alphabetical sorting of usernames) to ensure uniqueness at the database level.
-* **`infrastructure`**:
-    * `ws`: Contains the `StompAuthChannelInterceptor`. This is a critical component that intercepts the initial WebSocket **CONNECT** frame to validate the JWT header before a session is established.
-      * ClientIdMdcInterceptor: A channel interceptor that extracts the x-client-id and adds it to the Mapped Diagnostic Context (MDC) for structured, thread-safe logging.Upd
-      * WebSocketSecurityConfig: Configures Spring Security rules for STOMP, ensuring that subscribing or sending to /app/ and /topic/ destinations requires authentication.
-    * `persistence`: Spring Data JPA repositories.
+### 4. Try a DM
 
-#### 3. `realtime` (State Management)
-Manages ephemeral state, such as tracking which users are currently online via `WebSocketEvents` (Connect/Disconnect listeners).
-* WebSocketConfig: The core configuration class that enables the Simple Broker (/topic, /queue) and registers the /chat endpoint with SockJS.
-* WebSocketEvents: Tracks which users are currently online using STOMP Connect/Disconnect event listeners.
+1. Choose the development username `alice` and select **Login**. No password is required by the endpoint used by the UI.
+2. Open a separate browser profile or private window and log in as `bob`. Ordinary tabs on the same origin share the stored token.
+3. Wait for both sidebars to show **connected**.
+4. Alice enters `bob` under **Direct messages** and selects **Open**. Bob opens `alice` too.
+5. Send messages with **Send** or Enter. Close and reopen the conversation to retrieve its recent history.
 
----
+Use exact username spelling. A target must be online or already appear as a conversation member or message sender. There is no registration or user directory. Self-DMs and usernames containing `/`, `#`, or `?` are rejected by the UI.
 
-### 📡 The Communication Protocol (STOMP over WebSockets)
+## Development commands
 
-Unlike standard REST APIs, this application relies on a persistent, bi-directional connection.
+Run inside `frontend-chat-application/`:
 
-1.  **The Handshake:** The client connects via SockJS to `/chat`. The JWT is passed in the STOMP `CONNECT` headers.
-2.  **The Interceptor:** The backend `StompAuthChannelInterceptor` intercepts this frame, decodes the JWT, and assigns a Spring Security `Principal` to the WebSocket session.
-3.  **The Flow:**
-    * **Inbound (Client → Server):** Messages are sent to `/app/dm/...`.
-    * **Processing:** The controller persists the message to the H2 database.
-    * **Outbound (Server → Client):** The server pushes the message to specific user queues: `/user/queue/dm/{conversationId}`.
+| Command | Purpose |
+| --- | --- |
+| `npm ci` | Install locked dependencies |
+| `npm run dev` | Start the development server with backend proxies |
+| `npm test` | Run Node's built-in regression tests for tokens, DM helpers, and connection callbacks |
+| `npm run lint` | Run ESLint |
+| `npm run build` | Build the frontend into `dist/` |
+| `npm run preview` | Preview `dist/`; the development backend proxies are not provided |
 
----
+Run inside `backend/`, with `JWT_SECRET` configured:
 
-### 💾 Database Schema Design
+| Windows | Bash | Purpose |
+| --- | --- | --- |
+| `.\mvnw.cmd spring-boot:run` | `bash ./mvnw spring-boot:run` | Start the backend |
+| `.\mvnw.cmd test` | `bash ./mvnw test` | Run context and DM input regression tests |
+| `.\mvnw.cmd package` | `bash ./mvnw package` | Run tests and build the executable JAR |
 
-The application uses a relational model optimized for lookup speed:
+The backend does not bundle `dist/`. Serving the frontend outside Vite development requires routing `/auth`, `/api`, and `/chat`, including SockJS/WebSocket traffic, to the backend.
 
-| Entity | Description |
-| :--- | :--- |
-| **Conversation** | The root entity. Contains a unique `dmKey` (e.g., `"alice:bob"`) to ensure only one DM thread exists per pair of users. |
-| **ConversationMember** | A join table linking Users (by string username) to Conversations. Indexed to quickly find "All chats for Alice". |
-| **Message** | Stores the content, sender, and timestamp. Linked to a Conversation. |
+## Code and communication
 
----
+```text
+backend/src/main/java/com/message_app/demo/
+  auth/             Development login, JWT signing/parsing, HTTP security
+  chat/api/         DM open/send handlers, HTTP history, outgoing DTOs
+  chat/application/ Conversation lookup/creation and target existence
+  chat/domain/      Conversation, ConversationMember, Message
+  chat/infrastructure/ Persistence repositories and STOMP interceptors
+  realtime/         WebSocket broker and online username tracking
+frontend-chat-application/src/
+  App.jsx           Saved-login selection
+  ChatApp.jsx       DM layout, composer, local drafts
+  auth/             Development login and token helpers
+  chat/             Connection hook, DM helpers, sidebar and message list
+  logging/          Console and STOMP callback logging
+```
 
-### ⚛️ Frontend Architecture (React)
+SockJS connects to `/chat`. The STOMP CONNECT header supplies `Authorization: Bearer <token>`; the backend validates the token's signature and expiry and uses its subject as the session principal. The browser's saved-token check only checks payload format and expiry.
 
-The frontend uses a **Hybrid Data Loading** strategy to ensure performance:
+| Route or destination | Behavior |
+| --- | --- |
+| `POST /auth/dev-login` | Accepts `{"username":"alice"}`; returns a JWT valid for 12 hours and the username |
+| `POST /auth/login` | Legacy development endpoint: nonblank username and literal password `password`; one-hour token; unused by the UI |
+| `GET /api/dm/{conversationId}/messages?limit=50` | Latest messages returned chronologically; positive `limit`, no cursor/page parameter |
+| Send `/app/dm/{otherUserName}/open` | Resolve or create a DM; `{}` is sufficient |
+| Subscribe `/user/queue/dm/open` | Requesting session receives `{conversationId, otherUsername}` or `{errorCode, message, otherUsername}` |
+| Send `/app/dm/{otherUserName}/send` | `{"content":"Hello Bob"}`; trimmed, nonblank, maximum 2,000 characters |
+| Subscribe `/user/queue/dm/{conversationId}` | Saved message: `{id, conversationId, sender, content, sentAt}` |
 
-1.  **Initialization:** Uses `@stomp/stompjs` to establish the connection using the JWT from local storage.
-2.  **Opening a Chat:**
-    * Uses a **Request/Reply** pattern over WebSockets to ask the server for a `conversationId` based on a username.
-    * Once the ID is returned, it performs a standard **REST GET** request to fetch historical messages (pagination ready).
-3.  **Real-time Updates:** Subscribes to `/user/queue/dm/{id}` to receive new messages instantly without polling.
+The UI subscribes before fetching history and merges overlapping messages by ID. The in-process simple broker handles `/queue`; there is no external or durable broker. The backend still emits previews on `/user/queue/dm/notify` with placeholder `unreadCount=1`; the UI does not consume these notifications or display unread counts.
 
----
+## Storage and current limitations
+
+- **History lasts only for the backend session.** H2 is embedded and in memory. There is no MySQL driver/configuration, persistent datasource, or migration tooling. Backend restart clears conversations and messages.
+- **Development identity and access control.** Any nonempty development username can obtain a token. HTTP routes, including message history, are publicly permitted and have no participant checks. WebSocket origins are unrestricted, and `WebSocketSecurityConfig` is not registered as a Spring configuration. This prototype is intended for disposable local test messages.
+- **Logging.** Each DM appends participants and content to `message_log.txt` in the backend working directory. The text file is a debug log with no restore mechanism. `LIVE` means the recipient appeared online, not that they read the message. SQL/STOMP logs are enabled in development; the backend currently prints its signing secret at startup.
+- **Connection recovery.** Automatic reconnect is disabled until subscriptions and missed-message recovery are implemented. On connection loss, copy any draft before reloading to reconnect. If the backend key changed, clear the site's stored token and sign in again.
+- **Conversation discovery.** Reload clears the browser's conversation list; reopen a username to load history. Online tracking is a set of usernames rather than a full account/session directory, so multiple sessions per username are not reliably tracked.
+
+The next priorities are real accounts and participant authorization (including removing signing-secret logging), durable storage and conversation discovery, then reconnect/subscription recovery. Notifications and other chat features follow those foundations.
