@@ -1,5 +1,4 @@
 package com.message_app.demo.chat.application;
-//Todo Add file to Git
 
 import com.message_app.demo.chat.domain.Conversation;
 import com.message_app.demo.chat.domain.ConversationMember;
@@ -80,7 +79,6 @@ import org.springframework.stereotype.Service;
         }
     }
 
-    //TODO Fix userExists function. Needs a variable to store users. Could probably use or add variable in ConversationMemberRepository
     /**
      * Lightweight existence check used before opening a DM:
      *  - Accepts any of:

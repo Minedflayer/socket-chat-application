@@ -5,15 +5,14 @@ import com.message_app.demo.chat.domain.Conversation;
 import com.message_app.demo.chat.domain.Message;
 import com.message_app.demo.chat.application.DmService;
 import com.message_app.demo.chat.infrastructure.persistence.MessageRepository;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.Valid;
@@ -45,7 +44,6 @@ public class DmWebSocketController {
     // === WebSocket Destinations ===
     private static final String QUEUE_DM_BASE = "/queue/dm/";
     private static final String QUEUE_DM_OPEN = "/queue/dm/open";
-    private static final String QUEUE_WHOAMI = "/queue/whoami";
     private static final String QUEUE_DM_NOTIFY = "/queue/dm/notify";
 
 
@@ -188,38 +186,6 @@ public class DmWebSocketController {
         return new OpenOk(conv.getId(), otherUserName);
     }
 
-    /**
-     * Client publishes to: `/app/whoami`
-     * Returns (to the requesting user): the authenticated username.
-     *
-     * Useful for debugging STOMP auth/headers during development.
-     */
-   /* @MessageMapping(MAPPING_WHOAMI)
-    @SendToUser(QUEUE_WHOAMI)
-    public String whoami(Principal principal,
-                         @Header("simpSessionId") String sid,
-                         org.springframework.messaging.Message<?> message) {
-        Principal viaHeader = SimpMessageHeaderAccessor.getUser(message.getHeaders());
-
-        log.warn("WHOAMI handler: sid={} argPrincipal={} type={} name={}",
-                sid,
-                principal,
-                (principal == null ? null : principal.getClass().getName()),
-                (principal == null ? null : principal.getName()));
-
-        log.warn("WHOAMI handler: viaHeaderPrincipal={} type={} name={}",
-                viaHeader,
-                (viaHeader == null ? null : viaHeader.getClass().getName()),
-                (viaHeader == null ? null : viaHeader.getName()));
-
-        return principal != null ? principal.getName() : "<null>";
-    }*/
-
-    /**
-     * Centralized exception → {@link OpenErr} for the OPEN flow.
-     * Any exception thrown inside `open(...)` will be mapped here and returned to the user
-     * on `/user/queue/dm/open`.
-     */
     @org.springframework.messaging.handler.annotation.MessageExceptionHandler
     @SendToUser(value = QUEUE_DM_OPEN, broadcast = false)
     public OpenErr handleOpenErrors(Exception ex) {

@@ -38,16 +38,6 @@ public interface DmService {
      */
 
     Conversation getOrCreateDm(String u1, String u2);
-    /**
-     * Determines whether a user exists in the system.
-     *
-     * <p>Typical implementation checks:</p>
-     * - If the username appears in any conversation member table
-     * - Or if the user has previously sent messages
-     * - Or if the user is currently online (tracked by {@code OnlineUserRegistry})
-     *
-     * @param username the username to check
-     * @return true if the user exists or is online; false otherwise
-     */
+
     boolean userExists(String username);
 }

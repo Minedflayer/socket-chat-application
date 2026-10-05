@@ -1,6 +1,6 @@
 package com.message_app.demo.chat.domain;
 
-import com.message_app.demo.chat.domain.Conversation;
+//import com.message_app.demo.chat.domain.Conversation;
 import jakarta.persistence.*;
 
 /**
