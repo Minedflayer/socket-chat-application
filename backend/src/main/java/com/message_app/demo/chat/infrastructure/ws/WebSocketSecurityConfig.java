@@ -22,7 +22,7 @@ public class WebSocketSecurityConfig extends AbstractSecurityWebSocketMessageBro
                         org.springframework.messaging.simp.SimpMessageType.UNSUBSCRIBE,
                         org.springframework.messaging.simp.SimpMessageType.DISCONNECT).permitAll()
                 .simpDestMatchers("/app/**").authenticated()         // sending to app endpoints requires auth
-                .simpSubscribeDestMatchers("/topic/**", "/queue/**").authenticated() // subscribing requires auth
+                .simpSubscribeDestMatchers("/user/queue/**", "/queue/**").authenticated() // subscribing requires auth
                 .anyMessage().authenticated();
     }
     @Override

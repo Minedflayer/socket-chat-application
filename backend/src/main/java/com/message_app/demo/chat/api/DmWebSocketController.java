@@ -16,7 +16,9 @@ import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.FileWriter;
@@ -54,8 +56,11 @@ public class DmWebSocketController {
     private static final Logger log = LoggerFactory.getLogger(DmWebSocketController.class);
 
     // === Records ===
-    /** DM "send" input payload. Validated by {@link @Validated} on the controller. */
-    public record ChatIn(@NotBlank String content) {
+    /** DM send input: trimmed, nonblank, and within the storage limit. */
+    public record ChatIn(@NotBlank @Size(max = 2000) String content) {
+        public ChatIn {
+            content = content == null ? null : content.trim();
+        }
     }
     /** Minimal notifier shape you could send to inbox lists / badges (kept here for future use). */
     public record DmNotifier(Long conversationId, String from, String preview, Instant sentAt, long unreadCount) {
@@ -91,7 +96,7 @@ public class DmWebSocketController {
      *  - Each participant subscribes to `/user/queue/dm/{convId}` to receive messages in that DM.
      */
     @MessageMapping(MAPPING_DM_SEND)
-    public void send(@DestinationVariable String otherUserName, ChatIn in, Principal principal) throws AccessDeniedException {
+    public void send(@DestinationVariable String otherUserName, @Valid ChatIn in, Principal principal) throws AccessDeniedException {
         final String me = (principal != null) ? principal.getName() : null;
         if (me == null) throw new AccessDeniedException("Unauthenticated");
 
@@ -167,7 +172,7 @@ public class DmWebSocketController {
      *    subscribe to `/user/queue/dm/{conversationId}` and start sending/receiving.
      */
     @MessageMapping(MAPPING_DM_OPEN)
-    @SendToUser(QUEUE_DM_OPEN)
+    @SendToUser(value = QUEUE_DM_OPEN, broadcast = false)
     public Object open(@DestinationVariable String otherUserName, Principal principal) {
         final String me = principal != null ? principal.getName() : "<null>";
         log.info("OPEN DM request me={} target={}", me, otherUserName);
@@ -216,7 +221,7 @@ public class DmWebSocketController {
      * on `/user/queue/dm/open`.
      */
     @org.springframework.messaging.handler.annotation.MessageExceptionHandler
-    @SendToUser(QUEUE_DM_OPEN)
+    @SendToUser(value = QUEUE_DM_OPEN, broadcast = false)
     public OpenErr handleOpenErrors(Exception ex) {
         // You can inspect ex to tailor codes if you want
         return new OpenErr("OPEN_FAILED", ex.getMessage(), null);
